@@ -88,6 +88,8 @@ export default function App() {
 
   const [scoreResults, setScoreResults] = useState(null);
 
+  const [dora, setDora] = useState(0);
+
   const canAddMeld = hand.melds.length < 4;
   const canAddPair = hand.pair === null;
   const [locked, setLocked] = useState(false);
@@ -175,6 +177,21 @@ export default function App() {
         />
       )}
 
+      <div className="dora-input">
+        <label htmlFor="dora">Dora count:</label>
+        <input
+          id="dora"
+          type="number"
+          min="0"
+          step="1"
+          value={dora}
+          onChange={(e) => {
+            const value = e.target.value;
+            setDora(value === "" ? "" : Math.max(0, Math.floor(Number(value))));
+          }}
+        />
+      </div>
+
       <button onClick={() => {
         const analysis = normalizeHand(hand, win);
         const yakuResults = calculateYaku(analysis, riichi);
@@ -200,8 +217,9 @@ export default function App() {
             isDealer = true;
           }
 
+      const totalHan = yakuResults.han + Number(dora || 0);
       const results = calculateScore({
-        han: yakuResults.han,
+        han: totalHan,
         fu: fuResults.fu,
         isDealer,
         winMethod: win.method
