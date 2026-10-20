@@ -216,6 +216,7 @@ export default function App() {
     Calculate Points
   </button>
 )}
+
 {scoreResults && (
   <div className="score-results">
     <h3>Hand Results</h3>
@@ -284,8 +285,6 @@ export default function App() {
     )}
   </div>
 )}
-
-
     </div>
   );
 }
