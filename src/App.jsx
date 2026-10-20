@@ -86,6 +86,8 @@ export default function App() {
 
   const [riichi, setRiichi] = useState(false);
 
+  const [scoreResults, setScoreResults] = useState(null);
+
   const canAddMeld = hand.melds.length < 4;
   const canAddPair = hand.pair === null;
   const [locked, setLocked] = useState(false);
@@ -185,22 +187,105 @@ export default function App() {
         
       }}>Analysis</button>
 
-      {canCalculate && (
-        <button onClick={() => {
-          const analysis = normalizeHand(hand, win);
-        const yakuResults = calculateYaku(analysis, riichi);
-        const fuResults = calculateFu(analysis, win);
+      
+{canCalculate && (
+  <button
+    onClick={() => {
+      const analysis = normalizeHand(hand, win);
+      const yakuResults = calculateYaku(analysis, riichi);
+      const fuResults = calculateFu(analysis, win);
 
-          let isDealer = false;
+      let isDealer = false;
           if (win.seatWind === win.roundWind) {
             isDealer = true;
           }
-          const scoreResults = calculateScore({ han: yakuResults.han, fu: fuResults.fu, isDealer, winMethod: win.method });
-          console.log({ scoreResults });          
-        }}>
-          Calculate Points
-        </button>
-      )}
+
+      const results = calculateScore({
+        han: yakuResults.han,
+        fu: fuResults.fu,
+        isDealer,
+        winMethod: win.method
+      });
+
+      setScoreResults({
+        ...results,
+        yaku: yakuResults.yaku
+      });
+    }}
+  >
+    Calculate Points
+  </button>
+)}
+{scoreResults && (
+  <div className="score-results">
+    <h3>Hand Results</h3>
+
+    <p>
+      <strong>Han:</strong> {scoreResults.han}
+    </p>
+
+    <p>
+      <strong>Fu:</strong> {scoreResults.fu}
+    </p>
+
+    {scoreResults.limit && (
+      <p>
+        <strong>Limit:</strong> {scoreResults.limit}
+      </p>
+    )}
+
+    <p>
+      <strong>Base points:</strong> {scoreResults.basePoints}
+    </p>
+
+    <h4>Payment</h4>
+
+    {scoreResults.payments?.fromDiscarder != null && (
+      <p>
+        Ron: {scoreResults.payments.fromDiscarder.toLocaleString()} points
+      </p>
+    )}
+
+    {scoreResults.payments?.fromEachPlayer != null && (
+      <p>
+        Each player pays: {scoreResults.payments.fromEachPlayer.toLocaleString()} points
+      </p>
+    )}
+
+    {scoreResults.payments?.dealer != null && (
+      <>
+        <p>
+          Dealer pays: {scoreResults.payments.dealer.toLocaleString()} points
+        </p>
+        <p>
+          Each non-dealer pays: {scoreResults.payments.others.toLocaleString()} points
+        </p>
+      </>
+    )}
+
+    <p>
+      <strong>Total points received:</strong>{" "}
+      {scoreResults.totalPoints.toLocaleString()}
+    </p>
+
+    <h4>Yaku</h4>
+    {scoreResults.yaku.length > 0 ? (
+      <ul>
+        {scoreResults.yaku.map((yaku, index) => (
+          <li key={index}>
+            {typeof yaku === "string"
+              ? yaku
+              : yaku.name ?? JSON.stringify(yaku)}
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p>No yaku detected.</p>
+    )}
+  </div>
+)}
+
+
     </div>
   );
 }
